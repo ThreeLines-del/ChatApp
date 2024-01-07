@@ -65,15 +65,12 @@ fun NavigationSystem(){
                 )
             }
             composable(
-                route ="Chat_Screen/{user_name}/{user_uid}/{profile_pic}",
+                route ="Chat_Screen/{user_name}/{user_uid}",
                 arguments = listOf(
                     navArgument("user_name"){
                         type = NavType.StringType
                     },
                     navArgument("user_uid"){
-                        type = NavType.StringType
-                    },
-                    navArgument("profile_pic"){
                         type = NavType.StringType
                     }
                 )
@@ -82,11 +79,8 @@ fun NavigationSystem(){
                 ChatScreen(
                     viewModel = viewModel,
                     userName = entry.arguments?.getString("user_name"),
-                    userUid = entry.arguments?.getString("user_uid"),
-                    profilePic = entry.arguments?.getString("profile_pic")
+                    userUid = entry.arguments?.getString("user_uid")
                 )
-                entry.arguments?.getString("profile_pic")?.let { Log.i("Nav Image", it) }
-                entry.arguments?.getString("user_name")?.let { Log.i("Nav Name", it) }
             }
         }
     }

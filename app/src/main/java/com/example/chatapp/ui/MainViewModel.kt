@@ -21,8 +21,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.util.Calendar
 
 class MainViewModel: ViewModel() {
-    private var _uid = MutableLiveData<String?>()
     val currentUserProfilePic: MutableState<String?> = mutableStateOf(null)
+    var receiverProfilePic: MutableState<String?> = mutableStateOf(null)
 
     private val _message = MutableStateFlow("")
     val message = _message.asStateFlow()
@@ -31,8 +31,7 @@ class MainViewModel: ViewModel() {
 
     val userList = MutableStateFlow<MutableList<User?>>(mutableListOf())
 
-    private val _authenticationStatus = MutableLiveData<AuthenticationStatus>()
-    val authenticationStatus: LiveData<AuthenticationStatus> = _authenticationStatus
+    val _authStatus: MutableState<AuthenticationStatus?> = mutableStateOf(null)
 
     val mAuth = FirebaseAuth.getInstance()
     private val firestore = Firebase.firestore
@@ -62,9 +61,10 @@ class MainViewModel: ViewModel() {
         mAuth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    _authenticationStatus.value = AuthenticationStatus.SUCCESS
+                    _authStatus.value = AuthenticationStatus.SUCCESS
                 } else {
-                    _authenticationStatus.value = AuthenticationStatus.FAILURE
+                    _authStatus.value = AuthenticationStatus.FAILURE
+                    Log.i("On Auth Failure", task.exception.toString())
                 }
             }
     }
@@ -74,9 +74,9 @@ class MainViewModel: ViewModel() {
         mAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    _authenticationStatus.value = AuthenticationStatus.SUCCESS
+                    _authStatus.value = AuthenticationStatus.SUCCESS
                 } else {
-                    _authenticationStatus.value = AuthenticationStatus.FAILURE
+                    _authStatus.value = AuthenticationStatus.FAILURE
                 }
             }
 
@@ -141,6 +141,7 @@ class MainViewModel: ViewModel() {
                         imageInStorage?.downloadUrl?.addOnSuccessListener { uri ->
                             val imageUri = uri.toString()
                             Log.i("LinesImages", imageUri)
+                            receiverProfilePic.value = imageUri
                             val user = User(userName, userEmail, userID, imageUri)
                             if (uid != userID) {
                                 usersList.add(user)

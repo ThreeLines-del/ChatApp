@@ -103,9 +103,9 @@ fun HomeScreen(
                     UserItem(
                         user = user,
                         onClick = {
-                            val encodedUri = URLEncoder.encode(user.profilePic, StandardCharsets.UTF_8.toString())
+                            viewModel.receiverProfilePic.value = user.profilePic
                             navController.navigate(
-                                "Chat_Screen/${user.name}/${user.uid}/${encodedUri}"
+                                "Chat_Screen/${user.name}/${user.uid}"
                             )
                             user.profilePic?.let { it1 -> Log.i("Sent Image", it1) }
                         }

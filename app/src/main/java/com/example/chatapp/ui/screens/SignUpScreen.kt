@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -45,7 +46,7 @@ fun SignUpScreen(
     viewModel: MainViewModel,
     navController: NavController
 ){
-    val authenticationStatus = viewModel.authenticationStatus
+    val authenticationStatus = viewModel._authStatus.value
     val context = LocalContext.current
 
     var name by remember{
@@ -77,18 +78,33 @@ fun SignUpScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AsyncImage(
-            model = imageUri,
-            contentDescription = null,
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape)
-                .clickable(
-                    onClick = {
-                        pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                    }
-                )
-        )
+        if(imageUri != null){
+            AsyncImage(
+                model = imageUri,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .clickable(
+                        onClick = {
+                            pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        }
+                    )
+            )
+        }else{
+            Image(
+                painter = painterResource(id = R.drawable.profile),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .clickable(
+                        onClick = {
+                            pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                        }
+                    )
+            )
+        }
 
         OutlinedTextField(
             value = name,
@@ -122,27 +138,11 @@ fun SignUpScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Button(onClick = {
+        Button(
+            onClick = {
             viewModel.signUp(email, password)
-            when(authenticationStatus.value){
-                AuthenticationStatus.SUCCESS -> {
-                    navController.navigate(
-                        "LogIn_Screen"
-                    )
-                    imageUri?.let {
-                        viewModel.addUserToDatabase(name, email, viewModel.mAuth.currentUser!!.uid,
-                            it
-                        )
-                    }
-                }
-                AuthenticationStatus.FAILURE -> {
-                    Toast.makeText(context, "an error occurred", Toast.LENGTH_SHORT).show()
-                }
-                null -> {
-                    Log.i("MyLog", "Auth Error")
-                }
-            }
-        }) {
+        },
+            colors = ButtonDefaults.buttonColors(Color(0xFF1566C0))) {
             Text(text = "Sign Up")
         }
 
@@ -154,6 +154,24 @@ fun SignUpScreen(
         } else if (uploadResult is MainViewModel.UploadResult.Failure) {
             // Handle failure
             Text("Image Upload Failed")
+        }
+
+        authenticationStatus?.let {
+            when (it) {
+                AuthenticationStatus.SUCCESS -> {
+                    navController.navigate(
+                        "LogIn_Screen"
+                    )
+                    imageUri?.let {image ->
+                        viewModel.addUserToDatabase(name, email, viewModel.mAuth.currentUser!!.uid,
+                            image
+                        )
+                    }
+                }
+                AuthenticationStatus.FAILURE -> {
+                    Toast.makeText(context, "an error occurred", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
     }

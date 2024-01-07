@@ -50,8 +50,7 @@ import java.nio.charset.StandardCharsets
 fun ChatScreen(
     viewModel: MainViewModel,
     userName: String?,
-    userUid: String?,
-    profilePic: String?
+    userUid: String?
 ) {
     val message by viewModel.message.collectAsState()
 
@@ -74,12 +73,8 @@ fun ChatScreen(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        val decodedUri = URLDecoder.decode(profilePic, StandardCharsets.UTF_8.toString())
-                        if (profilePic != null) {
-                            Log.i("Received Image", profilePic)
-                        }
                         AsyncImage(
-                            model = decodedUri.toString(),
+                            model = viewModel.receiverProfilePic.value,
                             contentDescription = null,
                             modifier = Modifier
                                 .size(50.dp)
